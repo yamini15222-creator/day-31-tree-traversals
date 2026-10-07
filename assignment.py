@@ -20,18 +20,6 @@ class TreeNode:
     right: TreeNode | None = None
 
 
-def _validate_order(order: str) -> None:
-    """Validate the requested traversal order."""
-
-    valid_orders = {"preorder", "inorder", "postorder"}
-
-    if order not in valid_orders:
-        raise ValueError(
-            f"Invalid traversal order: {order!r}. "
-            f"Expected one of {sorted(valid_orders)}."
-        )
-
-
 def preorder(root: TreeNode | None) -> list[int]:
     """Return values using recursive preorder traversal."""
 
@@ -84,22 +72,26 @@ def postorder(root: TreeNode | None) -> list[int]:
 
 
 def preorder_iterative(root: TreeNode | None) -> list[int]:
-    """Return values using iterative preorder traversal."""
+    """Return values using iterative preorder traversal.
 
+    Order:
+        Root -> Left -> Right
+    """
     if root is None:
         return []
 
     result: list[int] = []
-    stack = [root]
+    stack: list[TreeNode] = [root]
 
     while stack:
         node = stack.pop()
         result.append(node.value)
 
-        # Stack is LIFO, so right must be pushed first.
+        # Right is pushed first because stack is LIFO.
         if node.right is not None:
             stack.append(node.right)
 
+        # Left is pushed last so it is processed first.
         if node.left is not None:
             stack.append(node.left)
 
@@ -107,42 +99,53 @@ def preorder_iterative(root: TreeNode | None) -> list[int]:
 
 
 def inorder_iterative(root: TreeNode | None) -> list[int]:
-    """Return values using iterative inorder traversal."""
+    """Return values using iterative inorder traversal.
 
+    Order:
+        Left -> Root -> Right
+    """
     result: list[int] = []
     stack: list[TreeNode] = []
     current = root
 
     while current is not None or stack:
+
+        # Move to the leftmost node.
         while current is not None:
             stack.append(current)
             current = current.left
 
+        # Process the node.
         current = stack.pop()
         result.append(current.value)
 
+        # Process right subtree next.
         current = current.right
 
     return result
+
+
+def _validate_order(order: str) -> None:
+    """Validate traversal order."""
+
+    valid_orders = {
+        "preorder",
+        "inorder",
+        "postorder",
+    }
+
+    if order not in valid_orders:
+        raise ValueError(
+            f"Invalid traversal order: {order!r}. "
+            f"Expected one of {sorted(valid_orders)}."
+        )
 
 
 def export_decision_tree(
     root: TreeNode | None,
     order: TraversalOrder,
 ) -> list[int]:
-    """
-    Export a decision tree according to the requested traversal order.
-
-    Args:
-        root: Root node of the binary decision tree.
-        order: preorder, inorder, or postorder.
-
-    Returns:
-        Node values in the requested traversal order.
-
-    Raises:
-        ValueError: If the traversal order is invalid.
-    """
+    """Export a decision tree using the requested traversal."""
 
     _validate_order(order)
 
